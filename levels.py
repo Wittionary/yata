@@ -19,10 +19,23 @@ def initial_sync():
     """
     The first sync you run when there's no data at all
     """
-    payload = {"sync_token":"*", "resource_types":"['projects']"}
-    #response = r.get(endpoint_url, headers, json=payload)
+    payload = {"sync_token":"*", "resource_types":'["projects"]'}
     response = r.post(endpoint_url, headers=headers, data=payload)
-    #print(headers)
-    print(response.content)
+    response = json.loads(response.content)
+    with open("storage.json", "w") as f:
+        f.write(str(response))
 
-initial_sync()
+    sync_token = response["sync_token"]
+    return sync_token
+
+
+# App logic -------------------------------------------------
+
+sync_token = initial_sync()
+
+# So now I need to add something that
+# - checks to see when item(s) have been completed
+# - add points to experience system
+# - reflect XP increase in frontend
+
+# Test stuff with a sample project
