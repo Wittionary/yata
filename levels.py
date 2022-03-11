@@ -1,13 +1,14 @@
 import json
 import requests as r
 from todoist_api_python.api import TodoistAPI
+from datetime import datetime
 
 with open("config.json", "r") as f:
     config = json.load(f)
     api = TodoistAPI(config['todoist']['api_key'])
     api_key = config['todoist']['api_key']
 
-endpoint_url = "https://api.todoist.com/sync/v8/sync"
+endpoint_url = "https://api.todoist.com/sync/v8"
 headers = {"Authorization": f"Bearer {api_key}"}
 
 def auth_sync_api():
@@ -19,21 +20,63 @@ def initial_sync():
     """
     The first sync you run when there's no data at all
     """
+    path = "/sync"
     payload = {"sync_token":"*", "resource_types":'["projects"]'}
-    response = r.post(endpoint_url, headers=headers, data=payload)
+    response = r.post(f"{endpoint_url}{path}", headers=headers, data=payload)
     response = json.loads(response.content)
-    with open("storage.json", "w") as f:
+    with open("todoist-storage.json", "w") as f:
         f.write(str(response))
 
     sync_token = response["sync_token"]
     return sync_token
 
+def get_completed_tasks(since="2007-4-29T10:13"):
+    """
+    Get all completed tasks
+    """
+    path = "/completed/get_all"
+    payload = {"since":f"{since}"}
+    response = r.post(f"{endpoint_url}{path}", headers=headers, data=payload)
+    response = json.loads(response.content)
+
+    with open("todoist-storage.json", "w") as f:
+        f.write(str(response))
+
+    last_sync = get_now()
+    return last_sync
+
+def get_now():
+    """
+    Returns a Todoist-formatted datetime string
+    e.g. 2022-03-11T05:35
+    TODO: Test if it needs UTC or client timezone
+    """
+    now = datetime.utcnow().isoformat()
+    now_list = now.split(":")
+    now = f"{now_list[0]}:{now_list[1]}"
+    return now
+
+def set_levels_storage(object, value):
+    # open file
+    # find object/key
+    # write value
+    return True
+
+def get_levels_storage(object):
+    # open file
+    # find object/key
+    # return value
+    return True
+
 
 # App logic -------------------------------------------------
 
-sync_token = initial_sync()
+#sync_token = initial_sync()
+last_sync = get_completed_tasks()
+# Store the last_sync so we can check to see how far back we shoud look for newly/recently completed tasks
+# That probably belongs at the end of the get_completed_tasks() func
 
-# So now I need to add something that
+# MVP
 # - checks to see when item(s) have been completed
 # - add points to experience system
 # - reflect XP increase in frontend
