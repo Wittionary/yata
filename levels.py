@@ -43,7 +43,8 @@ def get_completed_tasks(since="2007-4-29T10:13"):
         f.write(str(response))
 
     last_sync = get_now()
-    return last_sync
+    set_levels_storage("last_sync", last_sync)
+    return
 
 def get_now():
     """
@@ -56,23 +57,35 @@ def get_now():
     now = f"{now_list[0]}:{now_list[1]}"
     return now
 
-def set_levels_storage(object, value):
+def set_levels_storage(key, value):
     # open file
-    # find object/key
-    # write value
-    return True
+    with open("levels-storage.json", "r") as f:
+        levels_storage = json.load(f)
 
-def get_levels_storage(object):
-    # open file
-    # find object/key
-    # return value
-    return True
+    # Add key-value pair to storage object
+    levels_storage[key] = value
+
+    with open("levels-storage.json", "w") as f:
+        f.write(str(levels_storage))
+
+    return
+
+def get_levels_storage(key):
+    """
+    Return the value of an object in app storage
+    """
+    with open("levels-storage.json", "r") as f:
+        levels_storage = json.load(f)
+
+    value = levels_storage[key]    
+    
+    return value
 
 
 # App logic -------------------------------------------------
 
 #sync_token = initial_sync()
-last_sync = get_completed_tasks()
+get_completed_tasks()
 # Store the last_sync so we can check to see how far back we shoud look for newly/recently completed tasks
 # That probably belongs at the end of the get_completed_tasks() func
 
