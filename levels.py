@@ -96,8 +96,8 @@ def get_levels_storage(key):
     with open(APP_STORAGE_FILENAME, "r") as f:
         levels_storage = json.load(f)
 
-    value = levels_storage[key]    
-    
+    value = levels_storage[key]  
+
     return value
 
 def get_todoist_storage(key):
@@ -116,9 +116,18 @@ def completed_tasks_count():
     count = len(get_todoist_storage("items"))
     return count
 
-def increment_experience_points():
-    # add some numbers to levels storage
-    return
+def increment_experience_points(points):
+    if points == None:
+        points = 1
+    
+    # If key doesn't exist yet, set it
+    try:
+        get_levels_storage("experience_points")
+    except KeyError:
+        set_levels_storage("experience_points", 0)
+
+    print(f"Adding {points} XP")
+    set_levels_storage("experience_points", get_levels_storage("experience_points") + points)
 
 # App logic -------------------------------------------------
 
@@ -129,6 +138,8 @@ def increment_experience_points():
 get_completed_tasks()
 
 #time.sleep(10)
+# it's not enough to get the Count. Need to validate task ID
+
 num_completed = completed_tasks_count()
 print(f"Num completed is: {num_completed}")
 print("Sleeping 20 seconds")
@@ -137,5 +148,7 @@ get_completed_tasks(get_levels_storage("last_sync"))
 new_num_completed = completed_tasks_count()
 print(f"New num completed is: {new_num_completed}")
 
+# TODO:figure out how to get incremental sync working so it's not wiping the entire file
+# each time.
 if new_num_completed > num_completed:
     increment_experience_points()
